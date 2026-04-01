@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommunityMarket – Track Real Market Prices Together</title>
+  <meta name="description" content="CommunityMarket: Track real-time market prices submitted by your community. Compare, analyze, and stay ahead of price changes across categories." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ───────── NAVIGATION ───────── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="logo-icon">🛒</span>
+        <span class="logo-text">Community<strong>Market</strong></span>
+      </a>
+      <div class="nav-links">
+        <a href="#dashboard" class="nav-link active" id="nav-dashboard">Dashboard</a>
+        <a href="#products" class="nav-link" id="nav-products">Products</a>
+        <a href="#submit" class="nav-link" id="nav-submit">Submit Price</a>
+        <a href="#leaderboard" class="nav-link" id="nav-leaderboard">Leaderboard</a>
+      </div>
+      <div class="nav-actions">
+        <button class="wishlist-nav-btn" id="wishlistNavBtn" onclick="toggleWishlist()">
+          ❤️ <span class="wishlist-badge" id="wishlistBadge">0</span>
+        </button>
+        <button class="cart-btn" id="cartNavBtn" onclick="toggleCart()">
+          🛒 <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+        <div id="navAuthGuest">
+          <button class="btn-ghost" onclick="openAuthModal('login')">Login</button>
+          <button class="btn-primary" onclick="openAuthModal('register')">Register</button>
+        </div>
+        <div id="navAuthUser" style="display:none;">
+          <div class="nav-user-info" id="navUserInfo"></div>
+          <button class="btn-ghost" id="sellerDashBtn" style="display:none;" onclick="openSellerDashboard()">🏪 My Dashboard</button>
+          <button class="btn-ghost" id="myOrdersBtn" style="display:none;" onclick="openMyOrders()">📦 My Orders</button>
+          <button class="btn-ghost" onclick="appLogout()">Logout</button>
+          <button class="btn-primary" id="openSubmitModal">+ Report Price</button>
+        </div>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ───────── MOBILE MENU ───────── -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#dashboard" class="mob-link" onclick="closeMobile()">Dashboard</a>
+    <a href="#products" class="mob-link" onclick="closeMobile()">Products</a>
+    <a href="#submit" class="mob-link" onclick="closeMobile()">Submit Price</a>
+    <a href="#leaderboard" class="mob-link" onclick="closeMobile()">Leaderboard</a>
+    <a href="#" class="mob-link" onclick="toggleWishlist();closeMobile()">❤️ Wishlist</a>
+    <a href="#" class="mob-link" onclick="toggleCart();closeMobile()">🛒 Cart</a>
+    <button class="btn-primary" onclick="openModal();closeMobile()">+ Report Price</button>
+  </div>
+
+  <!-- ───────── HERO ───────── -->
+  <section class="hero" id="dashboard">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🌐 Community Powered · Real-Time</div>
+      <h1 class="hero-title">India's <span class="gradient-text">Community Market</span><br>Price Tracker</h1>
+      <p class="hero-sub">Join thousands of contributors reporting real prices from local markets, stores, and online shops. Together we track, together we save.</p>
+      <div class="hero-actions">
+        <button class="btn-primary btn-lg" onclick="openModal()">📢 Report a Price</button>
+        <a href="#products" class="btn-outline btn-lg">Explore Prices →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-pill"><span class="stat-num" id="statReports">12,847</span><span class="stat-lbl">Price Reports</span></div>
+        <div class="stat-pill"><span class="stat-num" id="statProducts">3,200+</span><span class="stat-lbl">Products Tracked</span></div>
+        <div class="stat-pill"><span class="stat-num" id="statUsers">8,591</span><span class="stat-lbl">Contributors</span></div>
+        <div class="stat-pill"><span class="stat-num" id="statCities">240+</span><span class="stat-lbl">Cities</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── ALERTS TICKER ───────── -->
+  <div class="ticker-wrap">
+    <div class="ticker-label">🔔 LIVE UPDATES</div>
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- ───────── DASHBOARD CARDS ───────── -->
+  <section class="section" id="overview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Market Overview</h2>
+        <p class="section-sub">Today's price movements at a glance</p>
+      </div>
+      <div class="overview-grid" id="overviewGrid"></div>
+    </div>
+  </section>
+
+  <!-- ───────── CHART SECTION ───────── -->
+  <section class="section section-dark">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Price Trends</h2>
+        <p class="section-sub">30-day price history for top categories</p>
+      </div>
+      <div class="chart-tabs">
+        <button class="chart-tab active" data-cat="groceries">🛒 Groceries</button>
+        <button class="chart-tab" data-cat="fuel">⛽ Fuel</button>
+        <button class="chart-tab" data-cat="vegetables">🥦 Vegetables</button>
+        <button class="chart-tab" data-cat="electronics">💻 Electronics</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
+      <div class="chart-legend" id="chartLegend"></div>
+    </div>
+  </section>
+
+  <!-- ───────── PRODUCTS ───────── -->
+  <section class="section" id="products">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Browse Products</h2>
+        <p class="section-sub">Community-reported prices across all categories</p>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search products…" />
+        </div>
+        <div class="filter-pills" id="filterPills"></div>
+        <select id="sortSelect" class="sort-select">
+          <option value="recent">Most Recent</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="change">Biggest Change</option>
+        </select>
+      </div>
+
+      <div class="products-grid" id="productsGrid"></div>
+      <div class="load-more-wrap">
+        <button class="btn-outline" id="loadMoreBtn">Load More Products</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SUBMIT SECTION ───────── -->
+  <section class="section section-dark" id="submit">
+    <div class="container">
+      <div class="submit-cta">
+        <div class="submit-cta-content">
+          <h2 class="section-title">Spot a Price?<br><span class="gradient-text">Share It!</span></h2>
+          <p>Help your community by reporting prices you see at local markets, grocery stores, or online. Every report matters.</p>
+          <ul class="cta-benefits">
+            <li>✅ Earn contributor points</li>
+            <li>✅ Help neighbors save money</li>
+            <li>✅ Build price history data</li>
+            <li>✅ Anonymous or named reporting</li>
+          </ul>
+          <button class="btn-primary btn-lg" onclick="openModal()">Report a Price Now</button>
+        </div>
+        <div class="submit-cta-visual">
+          <div class="cta-card">
+            <div class="cta-card-header">Recent Community Reports</div>
+            <div id="recentFeed"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── LEADERBOARD ───────── -->
+  <section class="section" id="leaderboard">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Top Contributors 🏆</h2>
+        <p class="section-sub">Community members keeping prices accurate</p>
+      </div>
+      <div class="lb-grid">
+        <div class="lb-table-wrap">
+          <table class="lb-table" id="lbTable"></table>
+        </div>
+        <div class="lb-sidebar">
+          <div class="lb-badge-card">
+            <h3>Your Stats</h3>
+            <div class="your-stat"><span class="y-num">47</span><span class="y-lbl">Reports Submitted</span></div>
+            <div class="your-stat"><span class="y-num">1,240</span><span class="y-lbl">Points Earned</span></div>
+            <div class="your-stat"><span class="y-num">#128</span><span class="y-lbl">Global Rank</span></div>
+            <div class="badges-row" id="badgesRow"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── FOOTER ───────── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo-icon">🛒</span><span class="logo-text">Community<strong>Market</strong></span>
+          <p>India's community-driven platform for transparent market pricing. Together we track, together we save.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <a href="#">Dashboard</a><a href="#">Products</a><a href="#">Leaderboard</a><a href="#">API Access</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="#">Guidelines</a><a href="#">Report Abuse</a><a href="#">Discord</a><a href="#">Newsletter</a>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <a href="#">How It Works</a><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 CommunityMarket. All rights reserved.</p>
+        <p>Made with ❤️ for smarter shopping across India.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ───────── SUBMIT PRICE MODAL ───────── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div>
+          <h2>📋 Report a Price</h2>
+          <p style="font-size:0.78rem;color:var(--text3);margin-top:4px;">Spotted a price? Report it and our team will verify it.</p>
+        </div>
+        <button class="modal-close" id="modalClose" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="priceForm" onsubmit="submitPrice(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productName">Product Name *</label>
+              <input type="text" id="productName" placeholder="e.g. Basmati Rice 5kg" required />
+            </div>
+            <div class="form-group">
+              <label for="productCategory">Category *</label>
+              <select id="productCategory" required>
+                <option value="">Select category…</option>
+                <option value="groceries">🛒 Groceries</option>
+                <option value="vegetables">🥦 Vegetables & Fruits</option>
+                <option value="fuel">⛽ Fuel & Energy</option>
+                <option value="electronics">💻 Electronics</option>
+                <option value="clothing">👕 Clothing</option>
+                <option value="medicine">💊 Medicine</option>
+                <option value="transport">🚗 Transport</option>
+                <option value="housing">🏠 Housing</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productPrice">Price (₹) *</label>
+              <input type="number" id="productPrice" placeholder="0.00" min="0" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="productUnit">Unit</label>
+              <select id="productUnit">
+                <option value="per kg">per kg</option>
+                <option value="per litre">per litre</option>
+                <option value="per piece">per piece</option>
+                <option value="per dozen">per dozen</option>
+                <option value="per pack">per pack</option>
+                <option value="per month">per month</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="storeName">Store / Market Name</label>
+              <input type="text" id="storeName" placeholder="e.g. Big Bazaar, Local Mandi" />
+            </div>
+            <div class="form-group">
+              <label for="locationName">Location / City</label>
+              <input type="text" id="locationName" placeholder="e.g. Mumbai, Delhi" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="reporterName">Your Name (optional)</label>
+            <input type="text" id="reporterName" placeholder="Anonymous if left blank" />
+          </div>
+          <div class="form-group">
+            <label for="priceNote">Additional Notes</label>
+            <textarea id="priceNote" placeholder="Any context, brand, quality grade, etc." rows="3"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn-primary" id="submitBtn">Submit for Review ✓</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── TOAST ───────── -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ───────── CART SIDEBAR ───────── -->
+  <div class="cart-overlay" id="cartOverlay" onclick="handleCartOverlay(event)">
+    <aside class="cart-panel" id="cartPanel">
+      <div class="cart-header">
+        <h2>🛒 Your Cart</h2>
+        <button class="modal-close" onclick="toggleCart()">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-footer" id="cartFooter">
+        <div class="cart-total">
+          <span>Total</span>
+          <span id="cartTotal">₹0</span>
+        </div>
+        <button class="btn-primary full-width" onclick="openCheckoutModal()">💳 Checkout →</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ───────── CHECKOUT MODAL ───────── -->
+  <div class="modal-overlay" id="checkoutOverlay" onclick="handleCheckoutOverlay(event)">
+    <div class="modal" id="checkoutModal">
+      <div class="modal-header">
+        <div>
+          <h2>💳 Checkout</h2>
+          <p style="font-size:0.78rem;color:var(--text3);margin-top:4px;">Choose your fulfillment option</p>
+        </div>
+        <button class="modal-close" onclick="closeCheckoutModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="checkoutSummary"></div>
+        <div class="seller-divider">🚚 Fulfillment Option</div>
+        <div class="role-toggle" style="margin-bottom:16px;">
+          <button type="button" class="role-btn active" id="fulfillPickup" onclick="selectFulfillment('pickup')">🏪 Pick up in Store</button>
+          <button type="button" class="role-btn" id="fulfillDelivery" onclick="selectFulfillment('delivery')">🚚 Home Delivery</button>
+        </div>
+        <div id="deliveryFields" style="display:none;">
+          <div class="form-group">
+            <label for="checkoutAddress">📍 Delivery Address *</label>
+            <textarea id="checkoutAddress" placeholder="Full delivery address" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="checkoutPhone">📱 Phone Number</label>
+          <input type="tel" id="checkoutPhone" placeholder="+91 98765 43210" />
+        </div>
+        <div class="auth-error" id="checkoutError"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" onclick="closeCheckoutModal()">Cancel</button>
+          <button type="button" class="btn-primary" id="placeOrderBtn" onclick="placeOrder()">Place Order ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── PRODUCT DETAIL MODAL ───────── -->
+  <div class="modal-overlay" id="detailOverlay" onclick="handleDetailOverlay(event)">
+    <div class="modal detail-modal" id="detailModal">
+      <div class="modal-header">
+        <div>
+          <h2 id="detailTitle">Product</h2>
+          <p id="detailSub" style="font-size:0.82rem;color:var(--text3);margin-top:4px;"></p>
+        </div>
+        <button class="modal-close" onclick="closeDetailModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-prices" id="detailPrices"></div>
+        <div class="detail-chart-wrap">
+          <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:12px;">📈 Price History</h3>
+          <div class="detail-chart-container">
+            <canvas id="detailChart"></canvas>
+          </div>
+          <div class="detail-chart-legend" id="detailChartLegend"></div>
+        </div>
+        <div class="detail-info" id="detailInfo"></div>
+        <div class="detail-actions" id="detailActions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── AUTH MODAL ───────── -->
+  <div class="modal-overlay" id="authOverlay" onclick="handleAuthOverlayClick(event)">
+    <div class="modal auth-modal" id="authModal">
+      <div class="modal-header">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Login</button>
+          <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</button>
+        </div>
+        <button class="modal-close" onclick="closeAuthModal()">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" onsubmit="submitLogin(event)">
+          <p class="auth-subtitle">Welcome back to CommunityMarket</p>
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Your password" required />
+          </div>
+          <div class="auth-error" id="loginError"></div>
+          <div class="modal-actions">
+            <button type="submit" class="btn-primary full-width" id="loginBtn">Login →</button>
+          </div>
+          <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthTab('register')">Register here</a></p>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="registerForm" onsubmit="submitRegister(event)" style="display:none;">
+          <p class="auth-subtitle">Join India's Community Price Tracker</p>
+
+          <!-- Role Toggle -->
+          <div class="role-toggle">
+            <button type="button" class="role-btn active" id="roleCustomer" onclick="selectRole('customer')">
+              🛍️ Customer
+            </button>
+            <button type="button" class="role-btn" id="roleSeller" onclick="selectRole('seller')">
+              🏪 Seller / Shopkeeper
+            </button>
+          </div>
+          <input type="hidden" id="regRole" value="customer" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="regName">Full Name *</label>
+              <input type="text" id="regName" placeholder="Your name" required />
+            </div>
+            <div class="form-group">
+              <label for="regCity">City *</label>
+              <input type="text" id="regCity" placeholder="e.g. Mumbai" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="regEmail">Email Address *</label>
+              <input type="email" id="regEmail" placeholder="you@example.com" required />
+            </div>
+            <div class="form-group">
+              <label for="regPhone">Phone (optional)</label>
+              <input type="tel" id="regPhone" placeholder="+91 98765 43210" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password *</label>
+            <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6" />
+          </div>
+
+          <div id="sellerFields" style="display:none;">
+            <div class="seller-divider">🏪 Shop Details</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regShopName">Shop Name *</label>
+                <input type="text" id="regShopName" placeholder="e.g. Ravi General Store" />
+              </div>
+              <div class="form-group">
+                <label for="regShopCat">Shop Category</label>
+                <select id="regShopCat">
+                  <option value="">Select…</option>
+                  <option value="groceries">🛒 Groceries</option>
+                  <option value="vegetables">🥦 Vegetables</option>
+                  <option value="fuel">⛽ Fuel</option>
+                  <option value="electronics">💻 Electronics</option>
+                  <option value="clothing">👕 Clothing</option>
+                  <option value="medicine">💊 Medicine / Pharmacy</option>
+                  <option value="transport">🚗 Transport</option>
+                  <option value="housing">🏠 Housing / Real Estate</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="regShopAddress">📍 Shop Address *</label>
+              <input type="text" id="regShopAddress" placeholder="Full shop address (e.g. 23, MG Road, Bangalore)" />
+            </div>
+            <p style="font-size:0.75rem;color:var(--text3);margin-top:-8px;margin-bottom:10px;">
+              ℹ️ Your shop will be verified by our team within 24–48 hours after registration.
+            </p>
+          </div>
+
+          <div class="auth-error" id="registerError"></div>
+          <div class="modal-actions">
+            <button type="submit" class="btn-primary full-width" id="registerBtn">Create Account →</button>
+          </div>
+          <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login')">Login here</a></p>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── RATING MODAL ───────── -->
+  <div class="modal-overlay" id="ratingOverlay" onclick="handleRatingOverlayClick(event)">
+    <div class="modal rating-modal" id="ratingModal">
+      <div class="modal-header">
+        <div>
+          <h2 id="ratingModalTitle">⭐ Rate Seller</h2>
+          <p id="ratingModalSub" style="font-size:0.82rem;color:var(--text3);margin-top:4px;"></p>
+        </div>
+        <button class="modal-close" onclick="closeRatingModal()">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Existing ratings summary -->
+        <div id="ratingSummary" class="rating-summary"></div>
+
+        <!-- Star input -->
+        <div class="star-rating-input" id="starInput">
+          <p style="font-size:0.9rem;color:var(--text2);margin-bottom:10px;">Your Rating</p>
+          <div class="stars-row" id="starsRow">
+            <span class="star-btn" data-v="1">★</span>
+            <span class="star-btn" data-v="2">★</span>
+            <span class="star-btn" data-v="3">★</span>
+            <span class="star-btn" data-v="4">★</span>
+            <span class="star-btn" data-v="5">★</span>
+          </div>
+          <p id="starLabel" class="star-label">Click to rate</p>
+        </div>
+        <input type="hidden" id="ratingValue" value="0" />
+
+        <div class="form-group" style="margin-top:12px;">
+          <label for="ratingComment">Comment (optional)</label>
+          <textarea id="ratingComment" placeholder="Share your experience with this seller…" rows="3"></textarea>
+        </div>
+
+        <div class="auth-error" id="ratingError"></div>
+
+        <!-- Recent reviews -->
+        <div id="recentReviews" class="recent-reviews"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" onclick="closeRatingModal()">Cancel</button>
+          <button type="button" class="btn-primary" id="submitRatingBtn" onclick="submitSellerRating()">Submit Rating ★</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── SELLER DASHBOARD MODAL ───────── -->
+  <div class="sd-overlay" id="sdOverlay" onclick="handleSdOverlay(event)">
+    <div class="sd-panel" id="sdPanel">
+
+      <!-- Header -->
+      <div class="sd-header">
+        <div class="sd-header-left">
+          <span class="sd-shop-icon">🏪</span>
+          <div>
+            <h2 id="sdShopName">My Shop</h2>
+            <p id="sdShopMeta" style="font-size:0.82rem;color:var(--text3);"></p>
+          </div>
+        </div>
+        <div class="sd-header-actions">
+          <button class="btn-primary" onclick="openSdAddProduct()" style="gap:6px;">+ Add Product</button>
+          <button class="sd-close" onclick="closeSellerDashboard()">✕</button>
+        </div>
+      </div>
+
+      <div class="sd-body">
+        <!-- Left sidebar: stats + ratings -->
+        <aside class="sd-sidebar">
+          <div class="sd-stat-card">
+            <div class="sd-stat-num" id="sdTotalProducts">–</div>
+            <div class="sd-stat-lbl">Active Listings</div>
+          </div>
+          <div class="sd-stat-card" style="cursor:pointer;" onclick="sdSwitchTab('orders')">
+            <div class="sd-stat-num" id="sdPendingOrders">–</div>
+            <div class="sd-stat-lbl">Pending Orders</div>
+          </div>
+          <div class="sd-stat-card">
+            <div class="sd-stat-num" id="sdAvgRating">–</div>
+            <div class="sd-stat-lbl">Avg Customer Rating</div>
+          </div>
+          <div class="sd-stat-card">
+            <div class="sd-stat-num" id="sdRatingCount">–</div>
+            <div class="sd-stat-lbl">Total Reviews</div>
+          </div>
+
+          <!-- Recent reviews -->
+          <div class="sd-reviews" id="sdReviews">
+            <p class="sd-section-title">Recent Reviews</p>
+            <div id="sdReviewList"></div>
+          </div>
+        </aside>
+
+        <!-- Main: tabs + content -->
+        <main class="sd-main">
+          <!-- Tab bar -->
+          <div class="sd-tabs">
+            <button class="sd-tab active" id="sdTabProducts" onclick="sdSwitchTab('products')">📦 Listings</button>
+            <button class="sd-tab" id="sdTabOrders" onclick="sdSwitchTab('orders')">🛍️ Orders <span class="sd-orders-badge" id="sdOrdersBadge" style="display:none;"></span></button>
+          </div>
+
+          <!-- Products panel -->
+          <div id="sdPanelProducts">
+            <div class="sd-table-header">
+              <p class="sd-section-title">Your Listings</p>
+              <div class="sd-search-wrap">
+                <span>🔍</span>
+                <input type="text" id="sdSearch" placeholder="Search listings…" oninput="filterSdProducts()" />
+              </div>
+            </div>
+            <div id="sdProductsWrap">
+              <div id="sdLoadingMsg" style="text-align:center;padding:40px;color:var(--text3);">Loading your listings…</div>
+            </div>
+          </div>
+
+          <!-- Orders panel -->
+          <div id="sdPanelOrders" style="display:none;">
+            <div class="sd-table-header">
+              <p class="sd-section-title">Incoming Orders</p>
+            </div>
+            <div id="sdOrdersWrap">
+              <div style="text-align:center;padding:40px;color:var(--text3);">Loading orders…</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── SELLER ADD PRODUCT MODAL (z above dashboard) ───────── -->
+  <div class="sd-add-overlay" id="sdAddOverlay" onclick="handleSdAddOverlay(event)">
+    <div class="modal" id="sdAddModal" style="max-width:520px;z-index:4001;position:relative;">
+      <div class="modal-header">
+        <div>
+          <h2>📦 Add Product to Your Shop</h2>
+          <p id="sdAddShopLabel" style="font-size:0.82rem;color:var(--text3);margin-top:4px;"></p>
+        </div>
+        <button class="modal-close" onclick="closeSdAddProduct()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sdAddName">Product Name *</label>
+            <input type="text" id="sdAddName" placeholder="e.g. Basmati Rice, Tomatoes, Wheat Flour" />
+          </div>
+          <div class="form-group">
+            <label for="sdAddCategory">Category *</label>
+            <select id="sdAddCategory">
+              <option value="">— Select —</option>
+              <option value="groceries">🛒 Groceries</option>
+              <option value="vegetables">🥦 Vegetables &amp; Fruits</option>
+              <option value="fuel">⛽ Fuel</option>
+              <option value="electronics">💻 Electronics</option>
+              <option value="clothing">👕 Clothing</option>
+              <option value="medicine">💊 Medicine</option>
+              <option value="transport">🚗 Transport</option>
+              <option value="housing">🏠 Housing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sdAddPrice">Your Price (₹) *</label>
+            <input type="number" id="sdAddPrice" placeholder="e.g. 85" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label for="sdAddUnit">Unit</label>
+            <select id="sdAddUnit">
+              <option value="per kg">per kg</option>
+              <option value="per litre">per litre</option>
+              <option value="per piece">per piece</option>
+              <option value="per dozen">per dozen</option>
+              <option value="per pack">per pack</option>
+              <option value="per month">per month</option>
+              <option value="per trip">per trip</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="sdAddNote">Notes (optional)</label>
+          <input type="text" id="sdAddNote" placeholder="Brand, grade, variant — e.g. Aashirvaad 5kg bag" />
+        </div>
+
+        <!-- Hidden auto-filled fields -->
+        <input type="hidden" id="sdAddStore" />
+        <input type="hidden" id="sdAddCity" />
+
+        <div class="auth-error" id="sdAddError"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" onclick="closeSdAddProduct()">Cancel</button>
+          <button type="button" class="btn-primary" id="sdAddSubmitBtn" onclick="submitSdAddProduct()">
+            Add to Shop ✓
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- inline edit modal for price -->
+  <div class="modal-overlay" id="editProductOverlay" onclick="handleEditOverlay(event)">
+    <div class="modal" id="editProductModal" style="max-width:460px;">
+      <div class="modal-header">
+        <h2>✏️ Edit Listing</h2>
+        <button class="modal-close" onclick="closeEditProduct()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editProductId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editName">Product Name</label>
+            <input type="text" id="editName" />
+          </div>
+          <div class="form-group">
+            <label for="editCategory">Category</label>
+            <select id="editCategory">
+              <option value="groceries">🛒 Groceries</option>
+              <option value="vegetables">🥦 Vegetables</option>
+              <option value="fuel">⛽ Fuel</option>
+              <option value="electronics">💻 Electronics</option>
+              <option value="clothing">👕 Clothing</option>
+              <option value="medicine">💊 Medicine</option>
+              <option value="transport">🚗 Transport</option>
+              <option value="housing">🏠 Housing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editPrice">Price (₹) *</label>
+            <input type="number" id="editPrice" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label for="editUnit">Unit</label>
+            <select id="editUnit">
+              <option value="per kg">per kg</option>
+              <option value="per litre">per litre</option>
+              <option value="per piece">per piece</option>
+              <option value="per dozen">per dozen</option>
+              <option value="per pack">per pack</option>
+              <option value="per month">per month</option>
+              <option value="per trip">per trip</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editNote">Notes</label>
+          <textarea id="editNote" rows="2" placeholder="Brand, quality grade, etc."></textarea>
+        </div>
+        <div class="auth-error" id="editError"></div>
+        <div class="modal-actions">
+          <button class="btn-ghost" onclick="closeEditProduct()">Cancel</button>
+          <button class="btn-primary" onclick="saveEditProduct()">Save Changes ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── WISHLIST SIDEBAR ───────── -->
+  <div class="wishlist-overlay" id="wishlistOverlay" onclick="handleWishlistOverlay(event)">
+    <aside class="wishlist-panel" id="wishlistPanel">
+      <div class="cart-header">
+        <h2>❤️ Your Wishlist</h2>
+        <button class="modal-close" onclick="toggleWishlist()">✕</button>
+      </div>
+      <div class="cart-items" id="wishlistItems"></div>
+      <div class="wishlist-footer" id="wishlistFooter">
+        <button class="btn-primary full-width" onclick="moveAllWishlistToCart()">🛒 Move All to Cart</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ───────── COMPARE MODAL ───────── -->
+  <div class="modal-overlay" id="compareOverlay" onclick="handleCompareOverlay(event)">
+    <div class="modal compare-modal" id="compareModal">
+      <div class="modal-header">
+        <h2>⚖️ Price Comparison</h2>
+        <button class="modal-close" onclick="closeCompareModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="compareContent">Loading comparison…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── COMPARE FLOATING BAR ───────── -->
+  <div class="compare-bar" id="compareBar">
+    <div class="compare-bar-inner">
+      <div class="compare-bar-items" id="compareBarItems"></div>
+      <div class="compare-bar-actions">
+        <span class="compare-bar-count" id="compareBarCount">0 items selected</span>
+        <button class="btn-primary" id="compareBarBtn" onclick="openCompareModal()">⚖️ Compare Now</button>
+        <button class="btn-ghost" onclick="clearCompare()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── MY ORDERS MODAL (Customer) ───────── -->
+  <div class="modal-overlay" id="myOrdersOverlay" onclick="handleMyOrdersOverlay(event)" style="z-index:3200;">
+    <div class="modal" style="max-width:700px;max-height:88vh;display:flex;flex-direction:column;">
+      <div class="modal-header" style="flex-shrink:0;">
+        <div>
+          <h2 style="display:flex;align-items:center;gap:8px;">📦 My Orders</h2>
+          <p style="font-size:0.8rem;color:var(--text3);margin-top:4px;">Track your pickups and deliveries</p>
+        </div>
+        <button class="modal-close" id="myOrdersClose" onclick="closeMyOrders()">✕</button>
+      </div>
+      <div id="myOrdersList" style="flex:1;overflow-y:auto;padding:8px 0 4px;"></div>
+    </div>
+  </div>
+
+  <!-- ───────── SCRIPTS ───────── -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
